@@ -209,7 +209,7 @@ const routes = [
         meta: {
           title: '签到管理'
         },
-        component: () => import('../views/teacher/teacherSignIN.vue')
+        component: () => import('../views/teacher/teacherSignIn.vue')
       },
       {
         path: '/teacherClass',
