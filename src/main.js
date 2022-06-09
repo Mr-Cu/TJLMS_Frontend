@@ -13,7 +13,8 @@ Vue.use(VueParticles)
 Vue.use(ElementUI)
 Vue.use(VueAxios, axios)
 Vue.prototype.$echarts = echarts
-axios.defaults.baseURL = 'http://114.55.35.220:8080/api'
+// axios.defaults.baseURL = 'http://114.55.35.220:8080/api'
+axios.defaults.baseURL = 'http://124.221.144.87:9080/api'
 
 Vue.config.productionTip = false
 
