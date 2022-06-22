@@ -235,7 +235,9 @@ export default {
           (res) => {
             this.tableData = res.data.eachGrades
             this.attendance = res.data.attendance
+            this.attendance = this.attendance.toFixed(2)
             this.final = res.data.finalScore
+            this.final = this.final.toFixed(2)
           }
         )
         .catch(

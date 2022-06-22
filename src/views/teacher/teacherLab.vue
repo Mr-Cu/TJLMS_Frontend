@@ -186,17 +186,23 @@
                       >
                     </v-col>
                     <v-col cols="8">
-                      <el-form label-width="80px">
-                        <el-form-item>
+                      <el-form label-width="80px" ref="material" :model="material">
+                        <el-form-item prop="file">
                           <el-upload
+                            action="http://localhost:9080/api/minIO/uploadFile"
+                            accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.jpg,.png,.zip,.txt"
                             :on-preview="handlePreview"
                             :on-remove="handleRemove"
-                            action=""
-                            :file-list="fileList"
+                            :auto-upload="false"
                             :before-upload="BeforeUpload"
+                            :on-success="handleSuccess"
+                            :on-error="handleError"
+                            ref="upload"
                             drag
                             multiple
                           >
+                          <!-- :file-list="fileList" 删去这个才能成功调用on-success方法 -->
+                          <!-- :http-request="httpRequest" -->
                             <i class="el-icon-upload"></i>
                             <div class="el-upload__text">
                               将文件拖到此处，或<em>点击上传</em>
@@ -221,7 +227,7 @@
                   @click="projectDialogVisible = false"
                   >关闭</v-btn
                 >
-                <v-btn color="blue darken-1" text @click="submitProject"
+                <v-btn color="blue darken-1" text @click="submitProject()"
                   >发布</v-btn
                 >
               </div>
@@ -368,7 +374,10 @@ export default {
       menu: false,
       newFile: new FormData(),
       fileList: [],
-      fileInfo: {},
+      fileInfo: {
+        path: '',
+        fileName: ''
+      },
       thisId: 0,
       canGrade: true,
       canRelease: false
@@ -443,13 +452,27 @@ export default {
         return false
       }
     },
-
+    handleSuccess (response, file) {
+      // this.$message.success('上传文件成功')
+      // console.log(11)
+      console.log(response)
+      console.log(file)
+      // console.log(file.response.data)
+      this.fileInfo.path = response
+      this.fileInfo.fileName = file.name
+      // console.log(this.material)
+      // console.log(11)
+    },
+    handleError () {
+      this.$message.error('上传文件失败')
+    },
     submitProject () {
       if (!this.projectInfo.name) {
         this.$message.error('请输入实验项目名称')
       } else if (!this.projectInfo.intro) {
         this.$message.error('请输入实验简介')
       } else {
+        this.$refs.upload.submit()
         this.submit()
       }
     },
@@ -476,32 +499,71 @@ export default {
         await this.upload()
       }
     },
+    // async httpRequest (param) {
+    //   console.log(param)
+    //   const file = this.newFile.get('file')
+    //   const url = 'http://124.221.144.87:9080/api/minIO/uploadFile'
+    //   const config = {
+    //     headers: {
+    //       'Content-Type': 'multipart/form-data'
+    //     }
+    //   }
+    //   await axios.post(url, file, config)
+    //     .then(
+    //       (res) => {
+    //         console.log(res.data)
+    //         console.log(111)
+    //       })
+    //     .catch(
+    //       (err) => {
+    //         this.$message.error('指导书上传失败')
+    //         console.log(err)
+    //       }
+    //     )
+    // },
     async upload () {
-      const newData = this.newFile //  3. 拿到刚刚的数据，并将其传给后台
-      await axios({
-        url: 'http://114.55.35.220:8081/api/uploadFileLab',
-        method: 'post',
-        data: newData,
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      }).then((response) => {
-        this.fileInfo = response.data
-      })
-        .catch((err) => {
-          this.$message.error('指导书上传失败')
-          console.log(err)
-        })
+      // const file = this.newFile.get('file') //  3. 拿到刚刚的数据，并将其传给后台
+      // const url1 = '/minIO/uploadFile'
+      // await axios.post(url1, newData)
+      //   .then(
+      //     (res) => {
+      //       console.log(res.data)
+      //       console.log(111)
+      //     }
+      //   ).catch(
+      //     (err) => {
+      //       this.$message.error('指导书上传失败')
+      //       console.log(err)
+      //     }
+      //   )
+      // await axios({
+      //   url: 'http://124.221.144.87:9080/api/minIO/uploadFile',
+      //   method: 'post',
+      //   file: file,
+      //   headers: {
+      //     'Content-Type': 'multipart/form-data'
+      //   }
+      // }).then((response) => {
+      //   // this.fileInfo = response.data
+      //   console.log(response.data)
+      //   console.log(111)
+      // })
+      //   .catch((err) => {
+      //     this.$message.error('指导书上传失败')
+      //     console.log(err)
+      //   })
+      console.log(22)
+      console.log(this.fileInfo)
       const url = '/post/material'
       await axios.post(url, {
         labId: this.thisId,
-        location: this.fileInfo.path,
-        name: this.fileInfo.fileName,
-        uploader: this.teacherId
-
+        uploader: this.teacherId + '',
+        location: this.fileInfo.path + '',
+        name: this.fileInfo.fileName + ''
       })
         .then(
           (res) => {
+            // console.log(res)
             this.$message.success('指导书上传成功')
             this.projectDialogVisible = false
             this.reload()
